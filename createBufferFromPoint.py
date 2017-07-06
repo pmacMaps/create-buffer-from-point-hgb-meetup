@@ -12,6 +12,8 @@
 #
 # Created:     2/13/2017
 #
+# Updated:     7/5/2017
+#
 # Copyright:   (c) Cumberland County 2017
 #
 # Github:      https://github.com/pmacMaps
@@ -25,8 +27,7 @@
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Import system modules
-import arcpy
-import os, sys, time, datetime, traceback, string
+import arcpy, sys, time, datetime, traceback, string
 
 # User-defined variables from tool's dialog window
 # See http://pro.arcgis.com/en/pro-app/arcpy/functions/getparameterastext.htm
@@ -53,7 +54,7 @@ def addMessage(message):
     formattedTime = currentTime.strftime("%m-%d-%Y %H:%M:%S")
     # add message to tool's dialog window
     # See http://pro.arcgis.com/en/pro-app/arcpy/functions/addmessage.htm
-    arcpy.AddMessage('{} : {} \n \n'.format(formattedTime, message))
+    arcpy.AddMessage('{} : {} \n\n'.format(formattedTime, message))
 # end function AddMessage()
 
 # Create geometry point from latitude/longitude and convert to PA State Plane South (ft) coordinate system
@@ -92,19 +93,22 @@ def createSPCPoint(lat, lon, outLayer):
         # See http://pro.arcgis.com/en/pro-app/arcpy/functions/getmessages.htm
         resultValue = result.getMessages()
         # add results message to ArcGIS dialog window
-        arcpy.AddMessage(resultValue + '\n \n')
+        arcpy.AddMessage(resultValue + '\n\n')
 
         # Add message
         addMessage('Reprojected point from WGS 1984 to PA State Plane South (feet).')
 
     # if an error occured, write this to dialog window
-    except Exception:
-        # error message
-        e = sys.exc_info()[1]
+    except Exception as e:
+        # line of error
+        tbE = sys.exc_info()[2]
         # See http://pro.arcgis.com/en/pro-app/arcpy/functions/adderror.htm
-        arcpy.AddError(e.args[0] + '\n \n')
+        arcpy.AddError("Failed at Line %i \n\n" % tbE.tb_lineno)
+        arcpy.AddError('Error: {} \n\n'.format(e.message))
         # Add generic error message about tool
-        arcpy.AddError('There was an error running this tool \n \n')
+        arcpy.AddError('There was an error running this tool \n\n')
+        # exit script
+        sys.exit()
 # end createSPCPoint()
 
 def createBuffers(point, outLayer, distances, units):
@@ -127,13 +131,16 @@ def createBuffers(point, outLayer, distances, units):
         # Add Message
         addMessage('Created buffer(s) around location latitude: {}; longitude: {}.'.format(lat, lon))
     # if an error occured, write this to dialog window
-    except Exception:
-        # error message
-        e = sys.exc_info()[1]
+    except Exception as e:
+        # line of error
+        tbE = sys.exc_info()[2]
         # See http://pro.arcgis.com/en/pro-app/arcpy/functions/adderror.htm
-        arcpy.AddError(e.args[0] + '\n \n')
+        arcpy.AddError("Failed at Line %i \n\n" % tbE.tb_lineno)
+        arcpy.AddError('Error: {} \n\n'.format(e.message))
         # Add generic error message about tool
-        arcpy.AddError('There was an error running this tool \n \n')
+        arcpy.AddError('There was an error running this tool \n\n')
+        # exit script
+        sys.exit()
 # end createBuffer()
 
 # Run tools with user inputs
